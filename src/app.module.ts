@@ -10,11 +10,18 @@ import { ParticipantsModule } from './modules/participants/participants.module';
 import { CarsModule } from './modules/cars/cars.module';
 import { DonationsModule } from './modules/donations/donations.module';
 import { CommentsModule } from './modules/comments/comments.module';
+import { PicturesModule } from './modules/pictures/pictures.module';
+import { InventoriesModule } from './modules/inventories/inventories.module';
+import { InventoryTransactionsModule } from './modules/inventory-transactions/inventory-transactions.module';
+import { RequestsModule } from './modules/requests/requests.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      load: [() => ({
+        JWT_SECRET: process.env.JWT_SECRET || 'super-secret-key-please-change-in-production',
+      })],
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -58,6 +65,10 @@ import { CommentsModule } from './modules/comments/comments.module';
     CarsModule,
     DonationsModule,
     CommentsModule,
+    PicturesModule,
+    InventoriesModule,
+    InventoryTransactionsModule,
+    RequestsModule,
   ],
 })
 export class AppModule {} 

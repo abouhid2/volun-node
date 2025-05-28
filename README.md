@@ -4,7 +4,9 @@ A volunteer management system built with NestJS, TypeORM, and Firebase integrati
 
 ## Features
 
-- User authentication with Firebase
+- User authentication with JWT tokens and Firebase
+- Public access to read operations (no authentication required)
+- Authentication required only for creating and modifying resources
 - Entity (organization) management
 - Event management with recurrent event creation
 - Participant management with car assignment
@@ -18,6 +20,7 @@ A volunteer management system built with NestJS, TypeORM, and Firebase integrati
 - NestJS - A progressive Node.js framework
 - TypeORM - ORM for TypeScript and JavaScript
 - PostgreSQL - Relational database
+- JWT - JSON Web Tokens for authentication
 - Firebase - Authentication and real-time updates
 - TypeScript - Typed JavaScript
 - class-validator & class-transformer - DTOs validation
@@ -75,8 +78,11 @@ DB_USERNAME=username
 DB_PASSWORD=password
 DB_NAME=volun_development
 
+# Authentication
+JWT_SECRET=your-secure-jwt-secret-key
+
 # Frontend URL for CORS
-FRONTEND_URL=http://localhost:3001
+FRONTEND_URL=http://localhost:3000
 
 # Environment
 NODE_ENV=development
@@ -94,11 +100,13 @@ FIREBASE_DATABASE_URL=https://your-project.firebaseio.com
 Make sure you have PostgreSQL installed and running.
 
 For development:
+
 ```bash
 createdb volun_development
 ```
 
 For production:
+
 ```bash
 createdb volun_production
 ```
@@ -106,6 +114,7 @@ createdb volun_production
 ## Running the App
 
 Using the scripts:
+
 ```bash
 # Development mode
 ./start-dev.sh
@@ -115,6 +124,7 @@ Using the scripts:
 ```
 
 Or manually:
+
 ```bash
 # Development mode
 npm run start:dev
@@ -127,10 +137,14 @@ npm run start:prod
 ## API Endpoints
 
 ### Authentication
-- `POST /auth/register` - Register a new user
-- `POST /auth/login` - Login with email and password
+
+- `POST /auth/register` - Register a new user (returns JWT token)
+- `POST /auth/login` - Login with email and password (returns JWT token)
+- `GET /auth/profile` - Get user profile (requires authentication)
+- `POST /auth/firebase-login` - Login with Firebase token (returns JWT token)
 
 ### Users
+
 - `GET /users` - Get all users
 - `GET /users/:id` - Get a specific user
 - `POST /users` - Create a new user
@@ -138,6 +152,7 @@ npm run start:prod
 - `DELETE /users/:id` - Delete a user (soft delete)
 
 ### Entities (Organizations)
+
 - `GET /entities` - Get all entities
 - `GET /entities/:id` - Get a specific entity
 - `POST /entities` - Create a new entity
@@ -146,6 +161,7 @@ npm run start:prod
 - `POST /entities/:id/duplicate` - Duplicate an entity
 
 ### Events
+
 - `GET /events` - Get all events
 - `GET /events/:id` - Get a specific event
 - `POST /events` - Create a new event
@@ -155,10 +171,12 @@ npm run start:prod
 - `POST /events/:id/recurrent` - Create recurrent events
 
 ### Entity Events
+
 - `GET /entities/:entityId/events` - Get all events for an entity
 - `POST /entities/:entityId/events` - Create a new event for an entity
 
 ### Participants
+
 - `GET /events/:eventId/participants` - Get all participants for an event
 - `POST /events/:eventId/participants` - Add a participant to an event
 - `PATCH /events/:eventId/participants/:id` - Update a participant
@@ -166,6 +184,7 @@ npm run start:prod
 - `POST /events/:eventId/participants/:id/duplicate` - Duplicate a participant
 
 ### Cars
+
 - `GET /events/:eventId/cars` - Get all cars for an event
 - `POST /events/:eventId/cars` - Add a car to an event
 - `PATCH /events/:eventId/cars/:id` - Update a car
@@ -175,6 +194,7 @@ npm run start:prod
 - `POST /events/:eventId/cars/:id/clean_donations` - Remove all donations from a car
 
 ### Donations
+
 - `GET /events/:eventId/donations` - Get all donations for an event
 - `POST /events/:eventId/donations` - Add a donation to an event
 - `PATCH /events/:eventId/donations/:id` - Update a donation
@@ -183,6 +203,7 @@ npm run start:prod
 - `POST /events/:eventId/donations/:id/add_to_inventory` - Add a donation to inventory
 
 ### Comments
+
 - `GET /events/:eventId/comments` - Get all comments for an event
 - `POST /events/:eventId/comments` - Add a comment to an event
 - `PATCH /events/:eventId/comments/:id` - Update a comment
@@ -190,10 +211,48 @@ npm run start:prod
 
 ## Authentication
 
-This API uses Firebase Authentication. To authenticate, include the Firebase ID token in the Authorization header:
+This application uses JWT (JSON Web Tokens) for authentication. Authentication is optional for read operations but required for creating and modifying resources.
 
+### Public Access
+
+The following operations are publicly accessible without authentication:
+
+- Getting lists of entities, events, users, etc.
+- Viewing details of specific resources
+
+### Protected Operations
+
+The following operations require authentication:
+
+- Creating new resources (entities, events, users, etc.)
+- Updating existing resources
+- Deleting resources
+- Duplicating resources
+
+### How to Authenticate
+
+1. Register a new user or login to get a JWT token:
+
+```bash
+# Register
+curl -X POST http://localhost:3001/auth/register -H "Content-Type: application/json" -d '{"name":"John Doe","email":"john@example.com","password":"password123"}'
+
+# Login
+curl -X POST http://localhost:3001/auth/login -H "Content-Type: application/json" -d '{"email":"john@example.com","password":"password123"}'
 ```
-Authorization: Bearer <your-firebase-token>
+
+2. Use the returned token in your requests for protected operations:
+
+```bash
+curl -X POST http://localhost:3001/entities -H "Authorization: Bearer YOUR_JWT_TOKEN" -H "Content-Type: application/json" -d '{"name":"New Entity"}'
+```
+
+### Firebase Authentication
+
+The system also supports Firebase authentication. If you have a Firebase token, you can exchange it for a JWT token:
+
+```bash
+curl -X POST http://localhost:3001/auth/firebase-login -H "Content-Type: application/json" -d '{"token":"YOUR_FIREBASE_TOKEN"}'
 ```
 
 ## Migrating from Rails

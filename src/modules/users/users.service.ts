@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../entities/user.entity';
@@ -7,6 +7,8 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
@@ -42,19 +44,29 @@ export class UsersService {
   async create(createUserDto: CreateUserDto): Promise<User> {
     const { email, password } = createUserDto;
     
+    this.logger.log(`Checking if user with email ${email} already exists`);
     const existingUser = await this.usersRepository.findOne({ where: { email } });
     if (existingUser) {
+      this.logger.warn(`User with email ${email} already exists`);
       throw new BadRequestException('User with this email already exists');
     }
     
-    const hashedPassword = await bcrypt.hash(password, 10);
-    
-    const user = this.usersRepository.create({
-      ...createUserDto,
-      password_digest: hashedPassword,
-    });
-    
-    return this.usersRepository.save(user);
+    try {
+      this.logger.log('Hashing password');
+      const hashedPassword = await bcrypt.hash(password, 10);
+      
+      this.logger.log('Creating user entity');
+      const user = this.usersRepository.create({
+        ...createUserDto,
+        password_digest: hashedPassword,
+      });
+      
+      this.logger.log('Saving user to database');
+      return await this.usersRepository.save(user);
+    } catch (error) {
+      this.logger.error(`Error creating user: ${error.message}`, error.stack);
+      throw new BadRequestException(`Failed to create user: ${error.message}`);
+    }
   }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {

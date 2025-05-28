@@ -1,24 +1,40 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, Logger } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { LoginDto, RegisterDto } from './dto';
 import * as bcrypt from 'bcrypt';
 import { FirebaseService } from '../../firebase/firebase.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly usersService: UsersService,
     private readonly firebaseService: FirebaseService,
+    private readonly jwtService: JwtService,
   ) {}
 
   async register(registerDto: RegisterDto) {
     try {
+      this.logger.log(`Attempting to register user with email: ${registerDto.email}`);
       const user = await this.usersService.create(registerDto);
       
-      // We return the user without the password_digest
-      const { password_digest, ...result } = user;
-      return result;
+      // Generate JWT token
+      const token = this._generateToken(user);
+      
+      // Format response to match frontend expectations
+      return {
+        token,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          telephone: user.telephone
+        }
+      };
     } catch (error) {
+      this.logger.error(`Registration failed: ${error.message}`, error.stack);
       throw new BadRequestException(error.message);
     }
   }
@@ -32,10 +48,19 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
     
-    // In a real-world application, we would generate a JWT token here
-    // For now, we'll just return the user without the password_digest
-    const { password_digest, ...result } = user;
-    return result;
+    // Generate JWT token
+    const token = this._generateToken(user);
+    
+    // Format response to match frontend expectations
+    return {
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        telephone: user.telephone
+      }
+    };
   }
 
   async validateFirebaseToken(token: string) {
@@ -54,9 +79,26 @@ export class AuthService {
         });
       }
       
-      return user;
+      // Generate JWT token
+      const jwtToken = this._generateToken(user);
+      
+      // Format response to match frontend expectations
+      return {
+        token: jwtToken,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          telephone: user.telephone
+        }
+      };
     } catch (error) {
       throw new UnauthorizedException('Invalid token');
     }
+  }
+
+  private _generateToken(user: any) {
+    const payload = { email: user.email, sub: user.id };
+    return this.jwtService.sign(payload);
   }
 } 
