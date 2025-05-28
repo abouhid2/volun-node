@@ -79,6 +79,11 @@ web_modules/
 .env.production.local
 .env.local
 
+# Shell scripts with sensitive info
+start-*.sh
+*-env.sh
+!start-template.sh
+
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 .parcel-cache
@@ -134,3 +139,15 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Environment files
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# Shell scripts with sensitive info
+start-*.sh
+*-env.sh
+!start-template.sh
