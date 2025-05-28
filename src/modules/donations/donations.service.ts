@@ -36,6 +36,28 @@ export class DonationsService {
     return this.donationsRepository.save(donation);
   }
 
+  async createAndAddToInventory(createDonationDto: CreateDonationDto): Promise<any> {
+    // First create the donation
+    const donation = await this.create(createDonationDto);
+    
+    try {
+      // Then try to add it to inventory
+      await this.addToInventory(donation.id);
+      
+      // Return successful response
+      return {
+        donation,
+        message: "Donation created and added to inventory successfully"
+      };
+    } catch (error) {
+      // Return donation but with warning
+      return {
+        donation,
+        warning: `Donation created but failed to add to inventory: ${error.message}`
+      };
+    }
+  }
+
   async update(id: number, updateDonationDto: UpdateDonationDto): Promise<Donation> {
     const donation = await this.findOne(id);
     

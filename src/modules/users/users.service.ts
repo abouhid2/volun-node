@@ -53,14 +53,14 @@ export class UsersService {
     
     try {
       this.logger.log('Hashing password');
-      const hashedPassword = await bcrypt.hash(password, 10);
-      
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
       this.logger.log('Creating user entity');
-      const user = this.usersRepository.create({
-        ...createUserDto,
-        password_digest: hashedPassword,
-      });
-      
+    const user = this.usersRepository.create({
+      ...createUserDto,
+      password_digest: hashedPassword,
+    });
+    
       this.logger.log('Saving user to database');
       return await this.usersRepository.save(user);
     } catch (error) {

@@ -5,7 +5,6 @@ import { Event } from '../../entities/event.entity';
 import { AuthGuard } from '../auth/guards/auth.guard';
 
 @Controller('events')
-@UseGuards(AuthGuard)
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
@@ -19,25 +18,30 @@ export class EventsController {
     return this.eventsService.findOne(+id);
   }
 
+  @Delete(':id')
+  @UseGuards(AuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Param('id') id: string): Promise<void> {
+    await this.eventsService.remove(+id);
+    return;
+  }
+
   @Post()
+  @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createEventDto: CreateEventDto, @Req() req: any): Promise<Event> {
+  create(@Body() body: { event: CreateEventDto }, @Req() req: any): Promise<Event> {
     const userId = req.user?.id || 1;
-    return this.eventsService.create(createEventDto, userId);
+    return this.eventsService.create(body.event, userId);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateEventDto: UpdateEventDto): Promise<Event> {
-    return this.eventsService.update(+id, updateEventDto);
-  }
-
-  @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id') id: string): Promise<void> {
-    return this.eventsService.remove(+id);
+  @UseGuards(AuthGuard)
+  update(@Param('id') id: string, @Body() body: { event: UpdateEventDto }): Promise<Event> {
+    return this.eventsService.update(+id, body.event);
   }
 
   @Post(':id/duplicate')
+  @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.CREATED)
   duplicate(@Param('id') id: string, @Req() req: any): Promise<Event> {
     const userId = req.user?.id || 1;
@@ -45,6 +49,7 @@ export class EventsController {
   }
 
   @Post(':id/recurrent')
+  @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.CREATED)
   createRecurrent(
     @Param('id') id: string,
@@ -54,28 +59,5 @@ export class EventsController {
     const userId = req.user?.id || 1;
     const dates = body.dates.map(date => new Date(date));
     return this.eventsService.createRecurrent(+id, dates, userId);
-  }
-}
-
-@Controller('entities/:entityId/events')
-@UseGuards(AuthGuard)
-export class EntityEventsController {
-  constructor(private readonly eventsService: EventsService) {}
-
-  @Get()
-  findAllByEntity(@Param('entityId') entityId: string): Promise<Event[]> {
-    return this.eventsService.findAllByEntity(+entityId);
-  }
-
-  @Post()
-  @HttpCode(HttpStatus.CREATED)
-  create(
-    @Param('entityId') entityId: string,
-    @Body() createEventDto: CreateEventDto,
-    @Req() req: any,
-  ): Promise<Event> {
-    const userId = req.user?.id || 1;
-    createEventDto.entity_id = +entityId;
-    return this.eventsService.create(createEventDto, userId);
   }
 } 

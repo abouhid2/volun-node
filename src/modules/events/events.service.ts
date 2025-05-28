@@ -13,21 +13,20 @@ export class EventsService {
 
   async findAll(): Promise<Event[]> {
     return this.eventsRepository.find({
-      where: { deleted_at: null },
       relations: ['entity', 'user'],
     });
   }
 
   async findAllByEntity(entityId: number): Promise<Event[]> {
     return this.eventsRepository.find({
-      where: { entity_id: entityId, deleted_at: null },
+      where: { entity_id: entityId },
       relations: ['entity', 'user'],
     });
   }
 
   async findOne(id: number): Promise<Event> {
     const event = await this.eventsRepository.findOne({
-      where: { id, deleted_at: null },
+      where: { id },
       relations: ['entity', 'user'],
     });
 
@@ -57,8 +56,8 @@ export class EventsService {
 
   async remove(id: number): Promise<void> {
     const event = await this.findOne(id);
-    event.deleted_at = new Date();
-    await this.eventsRepository.save(event);
+    await this.eventsRepository.softRemove(event);
+    return;
   }
 
   async duplicate(id: number, userId: number): Promise<Event> {
