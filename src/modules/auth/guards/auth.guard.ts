@@ -1,9 +1,12 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, Inject, forwardRef } from '@nestjs/common';
 import { FirebaseService } from '../../../firebase/firebase.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private readonly firebaseService: FirebaseService) {}
+  constructor(
+    @Inject(forwardRef(() => FirebaseService))
+    private readonly firebaseService: FirebaseService
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();

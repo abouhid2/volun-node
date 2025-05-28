@@ -29,7 +29,7 @@ import { CommentsModule } from './modules/comments/comments.module';
             type: 'postgres',
             url: databaseUrl,
             entities: [__dirname + '/entities/*.entity{.ts,.js}'],
-            synchronize: configService.get('NODE_ENV') !== 'production',
+            synchronize: false,
             logging: configService.get('NODE_ENV') !== 'production',
             ssl: configService.get('NODE_ENV') === 'production' ? { rejectUnauthorized: false } : false,
           };
@@ -43,7 +43,7 @@ import { CommentsModule } from './modules/comments/comments.module';
             password: configService.get('DB_PASSWORD', 'postgres'),
             database: configService.get('DB_NAME', 'volun_node_dev'),
             entities: [__dirname + '/entities/*.entity{.ts,.js}'],
-            synchronize: configService.get('NODE_ENV') !== 'production',
+            synchronize: false,
             logging: configService.get('NODE_ENV') !== 'production',
           };
         }
