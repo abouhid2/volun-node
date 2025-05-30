@@ -22,15 +22,26 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.api = void 0;
-const functions = __importStar(require("firebase-functions"));
-const express_1 = __importDefault(require("express"));
-const app = (0, express_1.default)();
-app.get('/hello', (req, res) => {
-    res.send('Hello from Firebase Functions with TypeScript!');
+const functions = __importStar(require("firebase-functions/v2"));
+const pg_1 = require("pg");
+exports.api = functions.https.onRequest(async (req, res) => {
+    try {
+        // Get password secret
+        const dbPassword = await functions.config().secrets.get("VOLUN_PRODUCTION");
+        const pool = new pg_1.Pool({
+            user: "alex_admin",
+            host: "localhost",
+            database: "volun_production",
+            password: dbPassword,
+            port: 5432,
+        });
+        const result = await pool.query("SELECT NOW()");
+        res.json({ now: result.rows[0].now });
+    }
+    catch (error) {
+        console.error("DB connection error:", error);
+        res.status(500).send("Database connection failed");
+    }
 });
-exports.api = functions.https.onRequest(app);

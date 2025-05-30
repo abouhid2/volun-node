@@ -20,10 +20,9 @@ async function bootstrap() {
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
-  
-  const port = configService.get('PORT', 3001);
-  
-  await app.listen(port);
+    
+  const port = process.env.port || 8080;
+  app.listen(port, () => console.log(`Server listening on port ${port}`));
   console.log(`Application is running on: http://localhost:${port}`);
   console.log(`Accepting CORS requests from: ${frontendUrl}`);
 }
