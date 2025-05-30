@@ -22,7 +22,10 @@ export class InventoriesController {
   }
 
   @Post()
-  create(@Body() inventoryData: Partial<Inventory>): Promise<Inventory> {
+  create(@Body() inventoryData: Partial<Inventory>, @Param('entityId') entityId?: string): Promise<Inventory> {
+    if (entityId) {
+      inventoryData.entity_id = +entityId;
+    }
     return this.inventoriesService.create(inventoryData);
   }
 
