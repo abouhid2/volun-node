@@ -32,8 +32,10 @@ export class DonationsService {
   }
 
   async create(createDonationDto: CreateDonationDto): Promise<Donation> {
-    const donation = this.donationsRepository.create(createDonationDto);
-    return this.donationsRepository.save(donation);
+    // Map DTO fields to entity fields
+    const donationEntity = new Donation();
+    Object.assign(donationEntity, createDonationDto);
+    return this.donationsRepository.save(donationEntity);
   }
 
   async createAndAddToInventory(createDonationDto: CreateDonationDto): Promise<any> {
@@ -74,15 +76,15 @@ export class DonationsService {
   async duplicate(id: number): Promise<Donation> {
     const donation = await this.findOne(id);
     
-    const duplicatedDonation = this.donationsRepository.create({
-      event_id: donation.event_id,
-      user_id: donation.user_id,
-      type: donation.type,
-      quantity: donation.quantity,
-      unit: donation.unit,
-      description: donation.description,
-      car_id: donation.car_id,
-    });
+    // Create a new donation with the same properties
+    const duplicatedDonation = new Donation();
+    duplicatedDonation.event_id = donation.event_id;
+    duplicatedDonation.user_id = donation.user_id;
+    duplicatedDonation.donation_type = donation.donation_type; // Using the correct entity property name
+    duplicatedDonation.quantity = donation.quantity;
+    duplicatedDonation.unit = donation.unit;
+    duplicatedDonation.description = donation.description;
+    duplicatedDonation.car_id = donation.car_id;
     
     return this.donationsRepository.save(duplicatedDonation);
   }

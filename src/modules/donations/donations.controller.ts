@@ -18,27 +18,47 @@ export class DonationsController {
   @HttpCode(HttpStatus.CREATED)
   create(
     @Param('eventId') eventId: string,
-    @Body() body: { donation: CreateDonationDto, add_to_inventory?: boolean },
+    @Body() body: CreateDonationDto | { donation: CreateDonationDto, add_to_inventory?: boolean },
     @Req() req: any,
   ): Promise<Donation | any> {
-    body.donation.event_id = +eventId;
-    body.donation.user_id = req.user?.id || 1;
+    // Handle both formats: direct DTO or nested in 'donation' property
+    let donationData: CreateDonationDto;
+    let addToInventory = false;
     
-    // Check if we should add to inventory after creation
-    if (body.add_to_inventory) {
-      return this.donationsService.createAndAddToInventory(body.donation);
+    if ('donation' in body) {
+      donationData = body.donation;
+      addToInventory = body.add_to_inventory || false;
+    } else {
+      donationData = body as CreateDonationDto;
     }
     
-    return this.donationsService.create(body.donation);
+    // Set event_id and user_id
+    donationData.event_id = +eventId;
+    donationData.user_id = req.user?.id || 1;
+    
+    // Check if we should add to inventory after creation
+    if (addToInventory) {
+      return this.donationsService.createAndAddToInventory(donationData);
+    }
+    
+    return this.donationsService.create(donationData);
   }
 
   @Patch(':id')
   @UseGuards(AuthGuard)
   update(
     @Param('id') id: string,
-    @Body() body: { donation: UpdateDonationDto },
+    @Body() body: { donation: UpdateDonationDto } | UpdateDonationDto,
   ): Promise<Donation> {
-    return this.donationsService.update(+id, body.donation);
+    let updateData: UpdateDonationDto;
+    
+    if ('donation' in body) {
+      updateData = body.donation;
+    } else {
+      updateData = body as UpdateDonationDto;
+    }
+    
+    return this.donationsService.update(+id, updateData);
   }
 
   @Delete(':id')

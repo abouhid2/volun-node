@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { DonationSetting } from '../../entities/donation-setting.entity';
 import { CreateDonationSettingDto } from './dto/create-donation-setting.dto';
 import { UpdateDonationSettingDto } from './dto/update-donation-setting.dto';
+import { DEFAULT_DONATION_TYPES, DEFAULT_DONATION_UNITS } from './donation-settings.constants';
 
 @Injectable()
 export class DonationSettingsService {
@@ -12,11 +13,30 @@ export class DonationSettingsService {
     private readonly donationSettingsRepository: Repository<DonationSetting>,
   ) {}
 
-  async findAllByEvent(eventId: number): Promise<DonationSetting[]> {
-    return this.donationSettingsRepository.find({
+  getDefaultTypes(): string[] {
+    return DEFAULT_DONATION_TYPES;
+  }
+
+  getDefaultUnits(): string[] {
+    return DEFAULT_DONATION_UNITS;
+  }
+
+  async findAllByEvent(eventId: number): Promise<any> {
+    const settings = await this.donationSettingsRepository.find({
       where: { event_id: eventId },
       relations: ['event'],
     });
+
+    // If settings exist, use their types and units
+    // Otherwise fallback to default types and units
+    const types = settings.length > 0 ? settings[0].types : this.getDefaultTypes();
+    const units = settings.length > 0 ? settings[0].units : this.getDefaultUnits();
+
+    return {
+      donation_settings: settings,
+      types: types,
+      units: units
+    };
   }
 
   async findOne(id: number): Promise<DonationSetting> {
@@ -33,7 +53,11 @@ export class DonationSettingsService {
   }
 
   async create(createDonationSettingDto: CreateDonationSettingDto): Promise<DonationSetting> {
-    const donationSetting = this.donationSettingsRepository.create(createDonationSettingDto);
+    const donationSetting = this.donationSettingsRepository.create({
+      ...createDonationSettingDto,
+      types: createDonationSettingDto.types || this.getDefaultTypes(),
+      units: createDonationSettingDto.units || this.getDefaultUnits(),
+    });
     return this.donationSettingsRepository.save(donationSetting);
   }
 

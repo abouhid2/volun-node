@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UseGuards, ValidationPipe } from '@nestjs/common';
 import { CarsService } from './cars.service';
 import { CreateCarDto, UpdateCarDto } from './dto';
 import { Car } from '../../entities/car.entity';
@@ -16,12 +16,12 @@ export class CarsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(
+  async create(
     @Param('eventId') eventId: string,
     @Body() createCarDto: CreateCarDto,
   ): Promise<Car> {
-    createCarDto.event_id = +eventId;
-    return this.carsService.create(createCarDto);
+    const dto = { ...createCarDto, event_id: +eventId };
+    return this.carsService.create(dto);
   }
 
   @Patch(':id')

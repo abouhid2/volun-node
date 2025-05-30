@@ -5,12 +5,22 @@ import { CreateDonationSettingDto } from './dto/create-donation-setting.dto';
 import { UpdateDonationSettingDto } from './dto/update-donation-setting.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
-@Controller('events/:eventId/donation-settings')
+@Controller('events/:eventId/donation_settings')
 export class DonationSettingsController {
   constructor(private readonly donationSettingsService: DonationSettingsService) {}
 
+  @Get('default-types')
+  getDefaultTypes(): string[] {
+    return this.donationSettingsService.getDefaultTypes();
+  }
+
+  @Get('default-units')
+  getDefaultUnits(): string[] {
+    return this.donationSettingsService.getDefaultUnits();
+  }
+
   @Get()
-  async findAllByEvent(@Param('eventId') eventId: string): Promise<DonationSetting[]> {
+  async findAllByEvent(@Param('eventId') eventId: string): Promise<any> {
     return this.donationSettingsService.findAllByEvent(+eventId);
   }
 

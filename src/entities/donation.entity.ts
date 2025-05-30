@@ -31,7 +31,7 @@ export class Donation {
   car_id: number;
 
   @Column({ name: 'donation_type' })
-  type: string;
+  donation_type: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   quantity: number;

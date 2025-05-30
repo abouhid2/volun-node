@@ -3,19 +3,17 @@ import { InventoriesService } from './inventories.service';
 import { Inventory } from '../../entities/inventory.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
-@Controller('inventories')
+@Controller(['inventories', 'entities/:entityId/inventories'])
 @UseGuards(JwtAuthGuard)
 export class InventoriesController {
   constructor(private readonly inventoriesService: InventoriesService) {}
 
   @Get()
-  findAll(): Promise<Inventory[]> {
+  findAll(@Param('entityId') entityId?: string): Promise<Inventory[]> {
+    if (entityId) {
+      return this.inventoriesService.findByEntityId(+entityId);
+    }
     return this.inventoriesService.findAll();
-  }
-
-  @Get('entity/:entityId')
-  findByEntityId(@Param('entityId') entityId: string): Promise<Inventory[]> {
-    return this.inventoriesService.findByEntityId(+entityId);
   }
 
   @Get(':id')
