@@ -6,7 +6,7 @@ export class CreateCommentDto {
   @IsString()
   content: string;
   
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
   @Type(() => Number)
   event_id: number;

@@ -27,7 +27,10 @@ export class RequestsController {
   }
 
   @Post()
-  create(@Body() requestData: Partial<Request>): Promise<Request> {
+  create(@Body() requestData: Partial<Request>, @Param('entityId') entityId?: string): Promise<Request> {
+    if (entityId) {
+      requestData.entity_id = +entityId;
+    }
     return this.requestsService.create(requestData);
   }
 

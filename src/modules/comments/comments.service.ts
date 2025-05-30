@@ -34,7 +34,9 @@ export class CommentsService {
 
   async create(createCommentDto: CreateCommentDto): Promise<Comment> {
     const comment = this.commentsRepository.create(createCommentDto);
-    return this.commentsRepository.save(comment);
+    const savedComment = await this.commentsRepository.save(comment);
+    
+    return this.findOne(savedComment.id);
   }
 
   async update(id: number, updateCommentDto: UpdateCommentDto): Promise<Comment> {
