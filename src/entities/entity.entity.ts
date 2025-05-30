@@ -1,4 +1,4 @@
-import { Entity as TypeormEntity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+import { Entity as TypeormEntity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, JoinColumn, DeleteDateColumn } from 'typeorm';
 import { User } from './user.entity';
 import { Event } from './event.entity';
 import { Inventory } from './inventory.entity';
@@ -36,7 +36,7 @@ export class Entity {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @Column({ nullable: true })
+  @DeleteDateColumn()
   deleted_at: Date;
 
   @ManyToOne(() => User, user => user.entities)

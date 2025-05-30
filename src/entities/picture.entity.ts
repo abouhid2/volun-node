@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
 
 @Entity('pictures')
 export class Picture {
@@ -14,7 +14,7 @@ export class Picture {
   @Column({ nullable: true })
   image_url: string;
 
-  @Column({ nullable: true })
+  @DeleteDateColumn()
   deleted_at: Date;
 
   @CreateDateColumn()

@@ -19,14 +19,14 @@ export class CarsService {
 
   async findAllByEvent(eventId: number): Promise<Car[]> {
     return this.carsRepository.find({
-      where: { event_id: eventId, deleted_at: null },
+      where: { event_id: eventId },
       relations: ['event', 'participants', 'donations'],
     });
   }
 
   async findOne(id: number): Promise<Car> {
     const car = await this.carsRepository.findOne({
-      where: { id, deleted_at: null },
+      where: { id },
       relations: ['event', 'participants', 'donations'],
     });
 
@@ -52,8 +52,7 @@ export class CarsService {
 
   async remove(id: number): Promise<void> {
     const car = await this.findOne(id);
-    car.deleted_at = new Date();
-    await this.carsRepository.save(car);
+    await this.carsRepository.softRemove(car);
   }
 
   async duplicate(id: number): Promise<Car> {
@@ -73,7 +72,7 @@ export class CarsService {
     
     // Find all participants in this car
     const participants = await this.participantsRepository.find({
-      where: { car_id: car.id, deleted_at: null },
+      where: { car_id: car.id },
     });
     
     // Remove car_id from all participants
@@ -88,7 +87,7 @@ export class CarsService {
     
     // Find all donations in this car
     const donations = await this.donationsRepository.find({
-      where: { car_id: car.id, deleted_at: null },
+      where: { car_id: car.id },
     });
     
     // Remove car_id from all donations

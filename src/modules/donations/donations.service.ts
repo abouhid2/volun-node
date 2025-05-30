@@ -13,14 +13,14 @@ export class DonationsService {
 
   async findAllByEvent(eventId: number): Promise<Donation[]> {
     return this.donationsRepository.find({
-      where: { event_id: eventId, deleted_at: null },
+      where: { event_id: eventId },
       relations: ['user', 'event', 'car'],
     });
   }
 
   async findOne(id: number): Promise<Donation> {
     const donation = await this.donationsRepository.findOne({
-      where: { id, deleted_at: null },
+      where: { id },
       relations: ['user', 'event', 'car'],
     });
 
@@ -68,8 +68,7 @@ export class DonationsService {
 
   async remove(id: number): Promise<void> {
     const donation = await this.findOne(id);
-    donation.deleted_at = new Date();
-    await this.donationsRepository.save(donation);
+    await this.donationsRepository.softRemove(donation);
   }
 
   async duplicate(id: number): Promise<Donation> {

@@ -13,14 +13,14 @@ export class ParticipantsService {
 
   async findAllByEvent(eventId: number): Promise<Participant[]> {
     return this.participantsRepository.find({
-      where: { event_id: eventId, deleted_at: null },
+      where: { event_id: eventId },
       relations: ['user', 'event', 'car'],
     });
   }
 
   async findOne(id: number): Promise<Participant> {
     const participant = await this.participantsRepository.findOne({
-      where: { id, deleted_at: null },
+      where: { id },
       relations: ['user', 'event', 'car'],
     });
 
@@ -46,8 +46,7 @@ export class ParticipantsService {
 
   async remove(id: number): Promise<void> {
     const participant = await this.findOne(id);
-    participant.deleted_at = new Date();
-    await this.participantsRepository.save(participant);
+    await this.participantsRepository.softRemove(participant);
   }
 
   async duplicate(id: number): Promise<Participant> {

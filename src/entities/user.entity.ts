@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, DeleteDateColumn } from 'typeorm';
 import { Entity as EntityModel } from './entity.entity';
 import { Event } from './event.entity';
 import { Participant } from './participant.entity';
@@ -29,7 +29,7 @@ export class User {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @Column({ nullable: true })
+  @DeleteDateColumn()
   deleted_at: Date;
 
   @OneToMany(() => EntityModel, entity => entity.user)

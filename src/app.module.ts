@@ -14,6 +14,7 @@ import { PicturesModule } from './modules/pictures/pictures.module';
 import { InventoriesModule } from './modules/inventories/inventories.module';
 import { InventoryTransactionsModule } from './modules/inventory-transactions/inventory-transactions.module';
 import { RequestsModule } from './modules/requests/requests.module';
+import { DonationSettingsModule } from './modules/donation-settings/donation-settings.module';
 
 @Module({
   imports: [
@@ -69,6 +70,7 @@ import { RequestsModule } from './modules/requests/requests.module';
     InventoriesModule,
     InventoryTransactionsModule,
     RequestsModule,
+    DonationSettingsModule,
   ],
 })
 export class AppModule {} 

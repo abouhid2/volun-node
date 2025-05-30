@@ -15,14 +15,12 @@ export class UsersService {
   ) {}
 
   async findAll(): Promise<User[]> {
-    return this.usersRepository.find({ 
-      where: { deleted_at: null },
-    });
+    return this.usersRepository.find();
   }
 
   async findOne(id: number): Promise<User> {
     const user = await this.usersRepository.findOne({ 
-      where: { id, deleted_at: null },
+      where: { id },
     });
     
     if (!user) {
@@ -34,7 +32,7 @@ export class UsersService {
 
   async findByEmail(email: string): Promise<User> {
     const user = await this.usersRepository.findOne({ 
-      where: { email, deleted_at: null },
+      where: { email },
       select: ['id', 'name', 'email', 'password_digest', 'telephone', 'created_at', 'updated_at'],
     });
     
@@ -81,7 +79,7 @@ export class UsersService {
     
     if (updateUserDto.email && updateUserDto.email !== user.email) {
       const existingUser = await this.usersRepository.findOne({ 
-        where: { email: updateUserDto.email, deleted_at: null } 
+        where: { email: updateUserDto.email } 
       });
       
       if (existingUser) {
@@ -96,8 +94,7 @@ export class UsersService {
 
   async remove(id: number): Promise<void> {
     const user = await this.findOne(id);
-    user.deleted_at = new Date();
-    await this.usersRepository.save(user);
+    await this.usersRepository.softRemove(user);
   }
 
   async validateUser(email: string, password: string): Promise<User> {

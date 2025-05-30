@@ -13,14 +13,13 @@ export class EntitiesService {
 
   async findAll(): Promise<Entity[]> {
     return this.entitiesRepository.find({
-      where: { deleted_at: null },
       relations: ['user'],
     });
   }
 
   async findOne(id: number): Promise<Entity> {
     const entity = await this.entitiesRepository.findOne({
-      where: { id, deleted_at: null },
+      where: { id },
       relations: ['user'],
     });
 
@@ -50,8 +49,7 @@ export class EntitiesService {
 
   async remove(id: number): Promise<void> {
     const entity = await this.findOne(id);
-    entity.deleted_at = new Date();
-    await this.entitiesRepository.save(entity);
+    await this.entitiesRepository.softRemove(entity);
   }
 
   async duplicate(id: number, userId: number): Promise<Entity> {
